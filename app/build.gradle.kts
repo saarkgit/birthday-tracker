@@ -50,8 +50,8 @@ android {
     sourceSets {
         getByName("androidTest").java.srcDirs("src/androidTest/java", "src/androidTest/java-hilt")
     }
-    
-    kotlin{
+
+    kotlin {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_17)
         }
@@ -133,8 +133,14 @@ dependencies {
     testImplementation("org.mockito:mockito-core:5.10.0")
     testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.0")
+
     testImplementation("androidx.arch.core:core-testing:2.2.0")
     testImplementation("app.cash.turbine:turbine:1.0.0")
+
+    androidTestImplementation("app.cash.turbine:turbine:1.0.0")
+
+    androidTestImplementation("org.jetbrains.kotlin:kotlin-test")
+    testImplementation("org.jetbrains.kotlin:kotlin-test")
 
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.4.0")
