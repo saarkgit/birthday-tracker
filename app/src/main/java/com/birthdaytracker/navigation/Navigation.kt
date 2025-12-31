@@ -82,6 +82,7 @@ fun AppNavigation(
             }
 
             composable(Screen.Settings.route) {
+                // Use single instance of SettingsViewModel from the activity scope
                 val settingsViewModel: SettingsViewModel = hiltViewModel()
                 SettingsScreen(
                     settingsViewModel = settingsViewModel,

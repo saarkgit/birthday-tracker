@@ -4,13 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.birthdaytracker.data.Birthday
 import com.birthdaytracker.repository.BirthdayRepository
+import com.birthdaytracker.util.PreferencesManager
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.Period
@@ -45,6 +41,9 @@ class BirthdayViewModel @Inject constructor(
     private val _sortOption = MutableStateFlow(SortOption.DATE)
     val sortOption: StateFlow<SortOption> = _sortOption.asStateFlow()
 
+    private val _sortAscending = MutableStateFlow(true)
+    val sortAscending: StateFlow<Boolean> = _sortAscending.asStateFlow()
+
     private val _errorMessage = MutableStateFlow<String?>(null)
     val errorMessage: StateFlow<String?> = _errorMessage.asStateFlow()
 
@@ -53,6 +52,10 @@ class BirthdayViewModel @Inject constructor(
 
     fun setSortOption(option: SortOption) {
         _sortOption.value = option
+    }
+
+    fun toggleSortOrder() {
+        _sortAscending.value = !_sortAscending.value
     }
 
     fun clearError() {

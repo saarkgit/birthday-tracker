@@ -4,8 +4,8 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
-    id("kotlin-kapt")
     id("com.google.dagger.hilt.android")
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -14,12 +14,19 @@ android {
 
     defaultConfig {
         applicationId = "com.birthdaytracker"
-        minSdk = 26
+        minSdk = 31
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
+//        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
         testInstrumentationRunner = "com.birthdaytracker.HiltTestRunner"
+
+//        testInstrumentationRunnerArguments["disableAnalytics"] = "true"
+//        testInstrumentationRunnerArguments["clearPackageData"] = "true"
+//        testInstrumentationRunnerArguments["useTestStorageService"] = "true"
+
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -48,7 +55,7 @@ android {
 
 
     sourceSets {
-        getByName("androidTest").java.srcDirs("src/androidTest/java", "src/androidTest/java-hilt")
+        getByName("androidTest").java.srcDirs("src/androidTest/java")
     }
 
     kotlin {
@@ -69,24 +76,30 @@ android {
     }
 
     testOptions {
-        unitTests.all {
-            it.systemProperty("robolectric.logging", "stdout")
-            it.systemProperty("robolectric.sdk", "34")
-
+        unitTests {
+            isIncludeAndroidResources = true
         }
-        // This is the magic line
-        // It tells Robolectric to run your tests against SDK 33
+
+        animationsDisabled = true
+        execution = "ANDROIDX_TEST_ORCHESTRATOR"
 
     }
 }
 
 dependencies {
     // Core Android
+//    androidTestImplementation("org.robolectric:robolectric:4.9")
+//    androidTestUtil("androidx.test:orchestrator:1.6.1")
+    androidTestUtil("androidx.test:orchestrator:1.5.0") // Use a recent, stable version
+
+    androidTestImplementation("androidx.tracing:tracing:1.0.0")
+
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.activity:activity-compose:1.9.2")
-    androidTestImplementation("androidx.test:runner:1.7.0")
-    androidTestImplementation("androidx.test.ext:junit-ktx:1.3.0")
+    androidTestImplementation("androidx.test:runner:1.5.2")
+    androidTestImplementation("androidx.test.ext:junit-ktx:1.1.5")
+    androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
 
     // Compose
@@ -106,7 +119,7 @@ dependencies {
     val roomVersion = "2.6.1"
     implementation("androidx.room:room-runtime:$roomVersion")
     implementation("androidx.room:room-ktx:$roomVersion")
-    kapt("androidx.room:room-compiler:$roomVersion")
+    ksp("androidx.room:room-compiler:$roomVersion")
 
     // ViewModel
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
@@ -123,10 +136,10 @@ dependencies {
 
     // Hilt Dependency Injection
     implementation("com.google.dagger:hilt-android:2.50")
-    kapt("com.google.dagger:hilt-android-compiler:2.50")
+    ksp("com.google.dagger:hilt-android-compiler:2.50")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
     implementation("androidx.hilt:hilt-work:1.2.0")
-    kapt("androidx.hilt:hilt-compiler:1.2.0")
+    ksp("androidx.hilt:hilt-compiler:1.2.0")
 
     // Testing
     testImplementation("junit:junit:4.13.2")
@@ -142,14 +155,13 @@ dependencies {
     androidTestImplementation("org.jetbrains.kotlin:kotlin-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test")
 
-    androidTestImplementation("androidx.test.ext:junit:1.2.1")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.4.0")
+//    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
     androidTestImplementation("org.mockito:mockito-core:5.10.0")
     androidTestImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
     androidTestImplementation("com.google.dagger:hilt-android-testing:2.50")
-    kaptAndroidTest("com.google.dagger:hilt-android-compiler:2.50")
+    kspAndroidTest("com.google.dagger:hilt-android-compiler:2.50")
     testImplementation("com.google.dagger:hilt-android-testing:2.50")
-    kaptTest("com.google.dagger:hilt-android-compiler:2.50")
+    kspTest("com.google.dagger:hilt-android-compiler:2.50")
 
     androidTestImplementation("androidx.work:work-testing:2.9.1")
 

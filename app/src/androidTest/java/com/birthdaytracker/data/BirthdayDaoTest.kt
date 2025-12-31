@@ -72,8 +72,8 @@ class BirthdayDaoTest {
         dao.getAllBirthdays().test {
             val birthdays = awaitItem()
             assertEquals(2, birthdays.size)
-            assertEquals("Alice", birthdays[0].name)
-            assertEquals("Bob", birthdays[1].name)
+            assertEquals("Bob", birthdays[0].name)  //bob is older (born 1988)
+            assertEquals("Alice", birthdays[1].name)
             cancelAndIgnoreRemainingEvents()
         }
     }
@@ -129,16 +129,16 @@ class BirthdayDaoTest {
 
     @Test
     fun getAllBirthdays_sorted_by_birthDate() = runTest {
-        dao.insertBirthday(Birthday(0, "Zoe", LocalDate.of(1990, 12, 31), ""))
+        dao.insertBirthday(Birthday(0, "Mike", LocalDate.of(1990, 12, 31), ""))
         dao.insertBirthday(Birthday(0, "Alice", LocalDate.of(1990, 1, 1), ""))
-        dao.insertBirthday(Birthday(0, "Mike", LocalDate.of(1990, 6, 15), ""))
+        dao.insertBirthday(Birthday(0, "Zoe", LocalDate.of(1990, 6, 15), ""))
 
         dao.getAllBirthdays().test {
             val birthdays = awaitItem()
             assertEquals(3, birthdays.size)
             assertEquals("Alice", birthdays[0].name) // Jan 1
-            assertEquals("Mike", birthdays[1].name)  // Jun 15
-            assertEquals("Zoe", birthdays[2].name)   // Dec 31
+            assertEquals("Zoe", birthdays[1].name)  // Jun 15
+            assertEquals("Mike", birthdays[2].name)   // Dec 31
             cancelAndIgnoreRemainingEvents()
         }
     }

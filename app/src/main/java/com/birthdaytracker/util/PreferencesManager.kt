@@ -15,7 +15,7 @@ import javax.inject.Singleton
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
-@Singleton // Good practice to ensure only one instance of PreferencesManager exists
+@Singleton
 class PreferencesManager @Inject constructor(@ApplicationContext context: Context) {
     private val dataStore = context.dataStore
 
@@ -66,4 +66,3 @@ class PreferencesManager @Inject constructor(@ApplicationContext context: Contex
         }
     }
 }
-

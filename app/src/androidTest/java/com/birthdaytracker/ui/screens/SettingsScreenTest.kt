@@ -6,9 +6,11 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.birthdaytracker.ui.theme.BirthdayTrackerTheme
 import com.birthdaytracker.util.PreferencesManager
+import com.birthdaytracker.viewmodel.BirthdayViewModel
 import com.birthdaytracker.viewmodel.SettingsViewModel
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
@@ -48,13 +50,13 @@ class SettingsScreenTest {
         whenever(mockPreferencesManager.notificationDayOf).thenReturn(flowOf(true))
         whenever(mockPreferencesManager.notificationWeekBefore).thenReturn(flowOf(true))
 
-        viewModel = SettingsViewModel(mockPreferencesManager)
     }
 
     @Test
     fun settingsScreen_displays_title() {
         composeTestRule.setContent {
             BirthdayTrackerTheme {
+                val viewModel: SettingsViewModel = hiltViewModel()
                 SettingsScreen(
                     settingsViewModel = viewModel,
                     onBack = {},
@@ -70,6 +72,7 @@ class SettingsScreenTest {
     fun settingsScreen_has_back_button() {
         composeTestRule.setContent {
             BirthdayTrackerTheme {
+                val viewModel: SettingsViewModel = hiltViewModel()
                 SettingsScreen(
                     settingsViewModel = viewModel,
                     onBack = {},
@@ -85,6 +88,7 @@ class SettingsScreenTest {
     fun settingsScreen_displays_display_section() {
         composeTestRule.setContent {
             BirthdayTrackerTheme {
+                val viewModel: SettingsViewModel = hiltViewModel()
                 SettingsScreen(
                     settingsViewModel = viewModel,
                     onBack = {},
@@ -100,6 +104,7 @@ class SettingsScreenTest {
     fun settingsScreen_displays_notifications_section() {
         composeTestRule.setContent {
             BirthdayTrackerTheme {
+                val viewModel: SettingsViewModel = hiltViewModel()
                 SettingsScreen(
                     settingsViewModel = viewModel,
                     onBack = {},
@@ -115,6 +120,7 @@ class SettingsScreenTest {
     fun settingsScreen_displays_default_view_option() {
         composeTestRule.setContent {
             BirthdayTrackerTheme {
+                val viewModel: SettingsViewModel = hiltViewModel()
                 SettingsScreen(
                     settingsViewModel = viewModel,
                     onBack = {},
@@ -132,6 +138,7 @@ class SettingsScreenTest {
     fun settingsScreen_displays_theme_option() {
         composeTestRule.setContent {
             BirthdayTrackerTheme {
+                val viewModel: SettingsViewModel = hiltViewModel()
                 SettingsScreen(
                     settingsViewModel = viewModel,
                     onBack = {},
@@ -148,6 +155,7 @@ class SettingsScreenTest {
     fun settingsScreen_displays_notification_toggles() {
         composeTestRule.setContent {
             BirthdayTrackerTheme {
+                val viewModel: SettingsViewModel = hiltViewModel()
                 SettingsScreen(
                     settingsViewModel = viewModel,
                     onBack = {},
@@ -166,6 +174,7 @@ class SettingsScreenTest {
 
         composeTestRule.setContent {
             BirthdayTrackerTheme {
+                val viewModel: SettingsViewModel = hiltViewModel()
                 SettingsScreen(
                     settingsViewModel = viewModel,
                     onBack = { backCalled = true },
@@ -182,6 +191,7 @@ class SettingsScreenTest {
     fun settingsScreen_default_view_dropdown_opens() {
         composeTestRule.setContent {
             BirthdayTrackerTheme {
+                val viewModel: SettingsViewModel = hiltViewModel()
                 SettingsScreen(
                     settingsViewModel = viewModel,
                     onBack = {},
@@ -201,6 +211,7 @@ class SettingsScreenTest {
     fun settingsScreen_theme_dropdown_opens() {
         composeTestRule.setContent {
             BirthdayTrackerTheme {
+                val viewModel: SettingsViewModel = hiltViewModel()
                 SettingsScreen(
                     settingsViewModel = viewModel,
                     onBack = {},
@@ -221,6 +232,7 @@ class SettingsScreenTest {
     fun settingsScreen_notification_switches_are_toggleable() {
         composeTestRule.setContent {
             BirthdayTrackerTheme {
+                val viewModel: SettingsViewModel = hiltViewModel()
                 SettingsScreen(
                     settingsViewModel = viewModel,
                     onBack = {},

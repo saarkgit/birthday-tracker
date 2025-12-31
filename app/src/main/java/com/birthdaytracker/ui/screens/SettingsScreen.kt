@@ -1,30 +1,14 @@
 package com.birthdaytracker.ui.screens
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Switch
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.birthdaytracker.ui.components.StableTopBar
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     settingsViewModel: com.birthdaytracker.viewmodel.SettingsViewModel,
@@ -38,14 +22,28 @@ fun SettingsScreen(
 
     Scaffold(
         topBar = {
-            StableTopBar(
-                title = { Text("Settings", style = MaterialTheme.typography.titleLarge) },
-                navigationIcon = {
-                    TextButton(onClick = onBack) {
-                        Text("Back")
-                    }
-                }
-            )
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .statusBarsPadding(),
+                color = MaterialTheme.colorScheme.surface,
+                tonalElevation = 3.dp
+            ) {
+                CenterAlignedTopAppBar(
+                    title = { Text("Settings", style = MaterialTheme.typography.titleLarge) },
+                    navigationIcon = {
+                        IconButton(onClick = onBack) {
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = "Back"
+                            )
+                        }
+                    },
+                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.surface
+                    )
+                )
+            }
         }
     ) { padding ->
         Column(
@@ -59,14 +57,15 @@ fun SettingsScreen(
                     subtitle = "Choose the default screen when opening the app"
                 ) {
                     var expanded by remember { mutableStateOf(false) }
-                    Box {
+                    Box(modifier = Modifier.width(140.dp)) {
                         TextButton(onClick = { expanded = true }) {
                             Text(
                                 text = when (defaultView) {
                                     "list" -> "List View"
                                     "calendar" -> "Calendar View"
                                     else -> "List View"
-                                }
+                                },
+                                maxLines = 1
                             )
                         }
                         DropdownMenu(
@@ -96,7 +95,7 @@ fun SettingsScreen(
                     subtitle = "Choose app theme"
                 ) {
                     var expanded by remember { mutableStateOf(false) }
-                    Box {
+                    Box(modifier = Modifier.width(140.dp)) {
                         TextButton(onClick = { expanded = true }) {
                             Text(
                                 text = when (themeMode) {
@@ -104,7 +103,8 @@ fun SettingsScreen(
                                     "dark" -> "Dark"
                                     "system" -> "Follow System"
                                     else -> "Follow System"
-                                }
+                                },
+                                maxLines = 1
                             )
                         }
                         DropdownMenu(
@@ -212,4 +212,3 @@ fun SettingsItem(
         action()
     }
 }
-

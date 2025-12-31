@@ -1,12 +1,16 @@
 package com.birthdaytracker.notification
 
 import android.content.Context
+import androidx.hilt.work.HiltWorkerFactory
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.work.Configuration
 import androidx.work.ListenableWorker
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
 import androidx.work.testing.SynchronousExecutor
 import androidx.work.testing.TestListenableWorkerBuilder
+import androidx.work.testing.TestWorkerBuilder
 import androidx.work.testing.WorkManagerTestInitHelper
 import com.birthdaytracker.data.Birthday
 import com.birthdaytracker.data.BirthdayDao
@@ -22,6 +26,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.time.LocalDate
+import java.util.concurrent.Executors
 import javax.inject.Inject
 import kotlin.test.assertEquals
 
@@ -48,6 +53,9 @@ class BirthdayNotificationWorkerTest {
     @Inject
     lateinit var dao: BirthdayDao
 
+    @Inject
+    lateinit var workerFactory: HiltWorkerFactory
+
     private lateinit var context: Context
 
     @Before
@@ -55,10 +63,10 @@ class BirthdayNotificationWorkerTest {
         hiltRule.inject()
         context = ApplicationProvider.getApplicationContext()
 
-        // Initialize WorkManager for testing
         val config = Configuration.Builder()
             .setMinimumLoggingLevel(android.util.Log.DEBUG)
-            .setExecutor(SynchronousExecutor())
+            .setExecutor(SynchronousExecutor()) // Use a synchronous executor for tests
+            .setWorkerFactory(workerFactory) // Pass the injected Hilt factory
             .build()
 
         WorkManagerTestInitHelper.initializeTestWorkManager(context, config)
@@ -71,13 +79,32 @@ class BirthdayNotificationWorkerTest {
 
     @Test
     fun worker_succeeds_with_empty_database() = runTest {
-        val worker = TestListenableWorkerBuilder<BirthdayNotificationWorker>(context)
-            .build()
+        // 1. Create a OneTimeWorkRequest for your worker
+        val request = androidx.work.OneTimeWorkRequestBuilder<BirthdayNotificationWorker>().build()
 
-        val result = worker.doWork()
+        // 2. Get the test WorkManager instance
+        val workManager = WorkManager.getInstance(context)
 
-        assertEquals(ListenableWorker.Result.success(), result)
+        // 3. Enqueue the work and wait for the result
+        workManager.enqueue(request).result.get()
+
+        // 4. Get the WorkInfo and assert that the work succeeded
+        val workInfo = workManager.getWorkInfoById(request.id).get()
+        assertEquals(WorkInfo.State.SUCCEEDED, workInfo.state)
     }
+
+//    @Test
+//    fun worker_succeeds_with_empty_database() = runTest {
+//
+//
+//
+//        val worker = TestListenableWorkerBuilder<BirthdayNotificationWorker>(context)
+//            .build()
+//
+//        val result = worker.doWork()
+//
+//        assertEquals(ListenableWorker.Result.success(), result)
+//    }
 
     @Test
     fun worker_succeeds_with_no_upcoming_birthdays() = runTest {
@@ -388,4 +415,6 @@ class BirthdayNotificationWorkerTest {
         val allBirthdays = repository.getAllBirthdays().first()
         assertEquals(100, allBirthdays.size)
     }
+
+
 }

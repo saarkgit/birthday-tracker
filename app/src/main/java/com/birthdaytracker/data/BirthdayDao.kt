@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface BirthdayDao {
-    @Query("SELECT * FROM birthdays ORDER BY birthDate ASC")    //might not need the orderby
+    @Query("SELECT * FROM birthdays ORDER BY birthDate ASC")
     fun getAllBirthdays(): Flow<List<Birthday>>
 
     @Query("SELECT * FROM birthdays WHERE id = :id")

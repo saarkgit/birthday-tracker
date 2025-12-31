@@ -1,44 +1,27 @@
 package com.birthdaytracker.ui.screens
 
 import android.widget.Toast
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.birthdaytracker.R
 import com.birthdaytracker.data.Birthday
-import com.birthdaytracker.ui.components.StableTopBar
 import com.birthdaytracker.viewmodel.BirthdayViewModel
 import com.vanpra.composematerialdialogs.datetime.date.datepicker
 import com.vanpra.composematerialdialogs.rememberMaterialDialogState
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddEditBirthdayScreen(
     viewModel: BirthdayViewModel = hiltViewModel(),
@@ -92,59 +75,70 @@ fun AddEditBirthdayScreen(
 
     Scaffold(
         topBar = {
-            StableTopBar(
-                title = {
-                    Text(
-                        stringResource(if (isEditMode) R.string.edit_birthday else R.string.add_birthday),
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                },
-                navigationIcon = {
-                    TextButton(onClick = onBack) {
-                        Text(stringResource(R.string.cancel))
-                    }
-                },
-                actions = {
-                    if (isEditMode) {
-                        IconButton(onClick = { showDeleteDialog = true }) {
-                            Icon(
-                                Icons.Default.Delete,
-                                contentDescription = stringResource(R.string.delete),
-                                tint = MaterialTheme.colorScheme.error
-                            )
+            Surface(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .statusBarsPadding(),
+                color = MaterialTheme.colorScheme.surface,
+                tonalElevation = 3.dp
+            ) {
+                CenterAlignedTopAppBar(
+                    title = {
+                        Text(
+                            stringResource(if (isEditMode) R.string.edit_birthday else R.string.add_birthday),
+                            style = MaterialTheme.typography.titleLarge
+                        )
+                    },
+                    navigationIcon = {
+                        TextButton(onClick = onBack) {
+                            Text(stringResource(R.string.cancel))
                         }
-                    }
-                    TextButton(
-                        onClick = {
-                            val validationError = viewModel.validateBirthday(name, birthDate)
-                            if (validationError != null) {
-                                nameError = validationError
-                                return@TextButton
+                    },
+                    actions = {
+                        if (isEditMode) {
+                            IconButton(onClick = { showDeleteDialog = true }) {
+                                Icon(
+                                    Icons.Default.Delete,
+                                    contentDescription = stringResource(R.string.delete),
+                                    tint = MaterialTheme.colorScheme.error
+                                )
                             }
+                        }
+                        TextButton(
+                            onClick = {
+                                val validationError = viewModel.validateBirthday(name, birthDate)
+                                if (validationError != null) {
+                                    nameError = validationError
+                                    return@TextButton
+                                }
 
-                            if (isEditMode && loadedBirthday != null) {
-                                viewModel.updateBirthday(
-                                    loadedBirthday!!.copy(
-                                        name = name.trim(),
-                                        category = category.trim(),
-                                        birthDate = birthDate
+                                if (isEditMode && loadedBirthday != null) {
+                                    viewModel.updateBirthday(
+                                        loadedBirthday!!.copy(
+                                            name = name.trim(),
+                                            category = category.trim(),
+                                            birthDate = birthDate
+                                        )
                                     )
-                                )
-                            } else {
-                                viewModel.insertBirthday(
-                                    Birthday(
-                                        name = name.trim(),
-                                        category = category.trim(),
-                                        birthDate = birthDate
+                                } else {
+                                    viewModel.insertBirthday(
+                                        Birthday(
+                                            name = name.trim(),
+                                            category = category.trim(),
+                                            birthDate = birthDate
+                                        )
                                     )
-                                )
+                                }
                             }
+                        ) {
+                            Text(stringResource(R.string.save))
                         }
-                    ) {
-                        Text(stringResource(R.string.save))
-                    }
-                }
-            )
+                    },
+                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.surface
+                    )
+                )
+            }
         }
     ) { padding ->
         Column(
@@ -166,7 +160,10 @@ fun AddEditBirthdayScreen(
                 isError = nameError != null,
                 supportingText = {
                     nameError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-                }
+                },
+                keyboardOptions = KeyboardOptions(
+                    capitalization = KeyboardCapitalization.Words
+                )
             )
 
             OutlinedTextField(
@@ -175,7 +172,10 @@ fun AddEditBirthdayScreen(
                 label = { Text(stringResource(R.string.enter_category)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
-                placeholder = { Text("e.g., Family, Friend, Colleague") }
+                placeholder = { Text("e.g., Family, Friend, Colleague") },
+                keyboardOptions = KeyboardOptions(
+                    capitalization = KeyboardCapitalization.Words
+                )
             )
 
             OutlinedButton(

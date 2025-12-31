@@ -1,35 +1,17 @@
 package com.birthdaytracker.ui.screens
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -37,7 +19,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.birthdaytracker.data.Birthday
-import com.birthdaytracker.ui.components.StableTopBar
 import com.birthdaytracker.viewmodel.BirthdayViewModel
 import com.birthdaytracker.viewmodel.SortOption
 import java.time.LocalDate
@@ -51,90 +32,143 @@ fun ListViewScreen(
 ) {
     val birthdays by viewModel.birthdays.collectAsState(initial = emptyList())
     val sortOption by viewModel.sortOption.collectAsState()
-    var showSortMenu by remember { mutableStateOf(false) }
+    val sortAscending by viewModel.sortAscending.collectAsState()
 
-    val sortedBirthdays = remember(birthdays, sortOption) {
-        when (sortOption) {
-            SortOption.DATE -> birthdays.sortedWith(compareBy { birthday ->
+    var showSortMenu by remember { mutableStateOf(false) }
+    var searchQuery by remember { mutableStateOf("") }
+    var showSearchBar by remember { mutableStateOf(false) }
+
+    // Filter birthdays by search query
+    val filteredBirthdays = remember(birthdays, searchQuery) {
+        if (searchQuery.isBlank()) {
+            birthdays
+        } else {
+            birthdays.filter { it.name.contains(searchQuery, ignoreCase = true) }
+        }
+    }
+
+    // Sort filtered birthdays
+    val sortedBirthdays = remember(filteredBirthdays, sortOption, sortAscending) {
+        val sorted = when (sortOption) {
+            SortOption.DATE -> filteredBirthdays.sortedWith(compareBy { birthday ->
                 val today = LocalDate.now()
                 val thisYear = birthday.birthDate.withYear(today.year)
                 val nextYear = birthday.birthDate.withYear(today.year + 1)
                 val upcoming = if (thisYear >= today) thisYear else nextYear
                 upcoming.toEpochDay()
             })
-
-            SortOption.NAME -> birthdays.sortedBy { it.name }
-            SortOption.CATEGORY -> birthdays.sortedBy { it.category }
+            SortOption.NAME -> filteredBirthdays.sortedBy { it.name }
+            SortOption.CATEGORY -> filteredBirthdays.sortedBy { it.category }
         }
+        if (sortAscending) sorted else sorted.reversed()
     }
 
     val nextUpcoming = viewModel.getNextUpcomingBirthday(sortedBirthdays)
     val todayBirthday = sortedBirthdays.firstOrNull { viewModel.isToday(it) }
 
     Scaffold(
-        topBar = {
-            StableTopBar(
-                title = { Text("Birthday Tracker", style = MaterialTheme.typography.titleLarge) },
-                actions = {
-                    IconButton(onClick = { showSortMenu = true }) {
-                        Icon(Icons.AutoMirrored.Filled.Sort, contentDescription = "Sort")
-                    }
-                    IconButton(onClick = onAddClick) {
-                        Icon(Icons.Default.Add, contentDescription = "Add Birthday")
-                    }
-                }
-            )
+        floatingActionButton = {
+            FloatingActionButton(onClick = onAddClick) {
+                Icon(Icons.Default.Add, contentDescription = "Add Birthday")
+            }
         }
     ) { padding ->
-        LazyColumn(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+                .padding(padding)
         ) {
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        "Name",
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.weight(1f)
-                    )
-                    Text(
-                        "Date",
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.weight(1f)
-                    )
-                    Text(
-                        "Category",
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-                HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+            // Search bar
+            if (showSearchBar) {
+                OutlinedTextField(
+                    value = searchQuery,
+                    onValueChange = { searchQuery = it },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    placeholder = { Text("Search by name...") },
+                    singleLine = true,
+                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                    trailingIcon = {
+                        if (searchQuery.isNotEmpty()) {
+                            IconButton(onClick = { searchQuery = "" }) {
+                                Icon(Icons.Default.Search, contentDescription = "Clear search")
+                            }
+                        }
+                    }
+                )
             }
 
-            items(
-                items = sortedBirthdays,
-                key = { it.id }
-            ) { birthday ->
-                val backgroundColor = when {
-                    todayBirthday?.id == birthday.id -> Color(0xFF4CAF50) // Green for today
-                    nextUpcoming?.id == birthday.id -> Color(0xFFFF9800) // Orange for upcoming
-                    else -> MaterialTheme.colorScheme.surface
+            // Action buttons
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                horizontalArrangement = Arrangement.End
+            ) {
+                IconButton(onClick = { showSearchBar = !showSearchBar }) {
+                    Icon(Icons.Default.Search, contentDescription = "Search")
+                }
+                IconButton(onClick = { showSortMenu = true }) {
+                    Icon(Icons.AutoMirrored.Filled.Sort, contentDescription = "Sort")
+                }
+                IconButton(onClick = { viewModel.toggleSortOrder() }) {
+                    Icon(
+                        if (sortAscending) Icons.Filled.ArrowUpward
+                        else Icons.Filled.ArrowDownward,
+                        contentDescription = if (sortAscending) "Ascending" else "Descending"
+                    )
+                }
+            }
+
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            "Name",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.weight(1f).padding(end = 8.dp)
+                        )
+                        Text(
+                            "Date",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.weight(1f).padding(end = 8.dp)
+                        )
+                        Text(
+                            "Category",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
                 }
 
-                BirthdayRow(
-                    birthday = birthday,
-                    backgroundColor = backgroundColor,
-                    onClick = { onBirthdayClick(birthday) }
-                )
+                items(
+                    items = sortedBirthdays,
+                    key = { it.id }
+                ) { birthday ->
+                    val backgroundColor = when {
+                        todayBirthday?.id == birthday.id -> Color(0xFF4CAF50)
+                        nextUpcoming?.id == birthday.id -> Color(0xFFFF9800)
+                        else -> MaterialTheme.colorScheme.surface
+                    }
+
+                    BirthdayRow(
+                        birthday = birthday,
+                        backgroundColor = backgroundColor,
+                        onClick = { onBirthdayClick(birthday) }
+                    )
+                }
             }
         }
     }
@@ -145,7 +179,7 @@ fun ListViewScreen(
             title = { Text("Sort By") },
             text = {
                 Column {
-                    SortOption.values().forEach { option ->
+                    SortOption.entries.forEach { option ->
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
@@ -185,11 +219,14 @@ fun BirthdayRow(
     onClick: () -> Unit
 ) {
     val today = LocalDate.now()
-    val thisYear = birthday.birthDate.withYear(today.year)
-    val nextYear = birthday.birthDate.withYear(today.year + 1)
-    val displayDate =
-        if (thisYear >= today) thisYear else nextYear //here is where you set the age for the birthdays
-    val age = java.time.Period.between(birthday.birthDate, displayDate).years
+
+    // Calculate current age (how old they are TODAY)
+    val currentAge = if (birthday.birthDate.isAfter(today)) {
+        0
+    } else {
+        java.time.Period.between(birthday.birthDate, today).years
+    }
+
     val formatter = DateTimeFormatter.ofPattern("MMM d, yyyy")
 
     Card(
@@ -209,13 +246,21 @@ fun BirthdayRow(
             Text(
                 text = birthday.name,
                 style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.weight(1f)
+                modifier = Modifier.weight(1f).padding(end = 8.dp)
             )
-            Text(
-                text = "${displayDate.format(formatter)} (Age $age)",
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.weight(1f)
-            )
+            Column(
+                modifier = Modifier.weight(1f).padding(end = 8.dp)
+            ) {
+                Text(
+                    text = birthday.birthDate.format(formatter),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    text = "Age $currentAge",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                )
+            }
             Text(
                 text = birthday.category.ifEmpty { "-" },
                 style = MaterialTheme.typography.bodyMedium,
@@ -224,4 +269,3 @@ fun BirthdayRow(
         }
     }
 }
-

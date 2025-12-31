@@ -61,7 +61,7 @@ class ListViewScreenTest {
                 // from our TestAppModule, which includes the mock repository.
                 val viewModel: BirthdayViewModel = hiltViewModel()
                 ListViewScreen(
-                    viewModel = hiltViewModel(),
+                    viewModel = viewModel,
                     onAddClick = {},
                     onBirthdayClick = {}
                 )
@@ -81,7 +81,7 @@ class ListViewScreenTest {
             BirthdayTrackerTheme {
                 val viewModel: BirthdayViewModel = hiltViewModel()
                 ListViewScreen(
-                    viewModel = hiltViewModel(),
+                    viewModel = viewModel,
                     onAddClick = { addClicked = true },
                     onBirthdayClick = {}
                 )
@@ -100,7 +100,7 @@ class ListViewScreenTest {
             BirthdayTrackerTheme {
                 val viewModel: BirthdayViewModel = hiltViewModel()
                 ListViewScreen(
-                    viewModel = hiltViewModel(),
+                    viewModel = viewModel,
                     onAddClick = {},
                     onBirthdayClick = { clickedBirthday = it }
                 )
@@ -117,7 +117,7 @@ class ListViewScreenTest {
             BirthdayTrackerTheme {
                 val viewModel: BirthdayViewModel = hiltViewModel()
                 ListViewScreen(
-                    viewModel = hiltViewModel(),
+                    viewModel = viewModel,
                     onAddClick = {},
                     onBirthdayClick = {}
                 )
