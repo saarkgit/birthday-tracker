@@ -97,4 +97,13 @@ class DateConverterTest {
 
         assertEquals(leapDay, convertedDate)
     }
+
+    // ...existing code...
+    @Test
+    fun `fromTimestamp converts timestamp to LocalDate correctly for endOfYear`() {
+        val endOfYear = LocalDate.of(1990, 12, 31)
+        val epochDay = converter.dateToTimestamp(endOfYear)
+        val restored = converter.fromTimestamp(epochDay)
+        assertEquals(endOfYear, restored)
+    }
 }

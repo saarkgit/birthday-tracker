@@ -5,6 +5,7 @@ import org.junit.Before
 import org.junit.Test
 import java.time.LocalDate
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
 
 class BirthdayNotificationHelperTest {
 
@@ -67,5 +68,40 @@ class BirthdayNotificationHelperTest {
         val result = helper.getBirthdaysToNotify(birthdays, notificationDayOf = true, notificationWeekBefore = false)
 
         assertEquals(3, result.size)
+    }
+
+    // ...existing code...
+    @Test
+    fun `days until uses total days across year boundary`() {
+        val helper = BirthdayNotificationHelper()
+        val today = LocalDate.of(2024, 12, 31)
+//        val oldDate = LocalDate.of(1990, 1, 1)
+//        val timeBetweenDates = today.toEpochDay() - oldDate.toEpochDay()
+        val birthdays = listOf(
+            Birthday( name = "new year", birthDate = LocalDate.of(1990, 1, 7))
+        )
+
+        val notify = helper.getBirthdaysToNotify(
+            birthdays,
+            notificationWeekBefore = true,
+            notificationDayOf = true,
+            today = today
+        )
+
+//        assertEquals(timeBetweenDates, 12783)
+        assertTrue(notify.isNotEmpty())
+        assertEquals(7, notify[0].second)
+    }
+
+    @Test
+    fun `leap year birthday notifies on feb 21 in non leap years`() {
+        val helper = BirthdayNotificationHelper()
+        val today = LocalDate.of(2023, 2, 21) // non-leap year
+        val birthdays = listOf(
+            Birthday(name = "Leap", birthDate = LocalDate.of(1992, 2, 29))
+        )
+
+        val notify = helper.getBirthdaysToNotify(birthdays, notificationWeekBefore = true, notificationDayOf = false, today = today)
+        assertTrue(notify.isNotEmpty())
     }
 }

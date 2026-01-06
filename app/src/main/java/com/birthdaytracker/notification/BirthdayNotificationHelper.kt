@@ -10,9 +10,10 @@ class BirthdayNotificationHelper @Inject constructor() {
     fun getBirthdaysToNotify(
         birthdays: List<Birthday>,
         notificationDayOf: Boolean,
-        notificationWeekBefore: Boolean
+        notificationWeekBefore: Boolean,
+        today: LocalDate = LocalDate.now()
     ): List<Pair<Birthday, Int>> {
-        val today = LocalDate.now()
+//        val today = LocalDate.now()
         val result = mutableListOf<Pair<Birthday, Int>>()
 
         birthdays.forEach { birthday ->
